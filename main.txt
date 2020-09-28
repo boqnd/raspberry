@@ -1,0 +1,129 @@
+
+
+import requests
+import os
+import json
+
+scan = ''
+
+with open("config.txt", "r") as config_file:
+    data = json.load(config_file)
+    
+print("\nCONFIGURATION\n")
+print(data)
+
+#------------------------------------------
+
+def connect_function(ssid, password):
+    try:
+        os.system("nmcli device wifi connect {} password {}".format(ssid, password))
+    except:
+        print("\nConnection fail")
+    else:
+        print("\nConnected to: " + ssid + ", with: " + password)
+        
+#------------------------------------------
+
+connect_function(data["ssid"], data["pass"])
+
+#------------------------------------------
+
+def dweet_function():
+    
+    with open("config.txt", "r") as config_file:
+        data = json.load(config_file)
+    
+    url = 'https://dweet.io/get/latest/dweet/for/' + data["name"]
+    response = requests.get(url)
+    response_status = response
+    response_json = json.loads(response.text)
+    
+    print("\nresponse: " + response_status)
+    print(response_json)
+    
+    with_array = response_json["with"]
+    with_array_0 = with_array[0]
+    thing_value = with_array_0["thing"]
+    content_json = with_array_0["content"]
+    
+    data["terminal"] = content_json["terminal"]
+    data["end_point"] = content_json["end_point"]
+    data["mode"] = "connect"
+    
+    with open("config.txt", "w") as config_file:
+        json.dump(data, config_file)
+    
+    print("\nNEW CONFIGURATION\n")
+    print(data)
+  
+#------------------------------------------
+
+if data["mode"] == 'dweet':
+    
+    dweet_function()
+
+#------------------------------------------
+
+def post_function():
+    
+    with open("config.txt", "r") as config_file:
+        data = json.load(config_file)
+        
+    url = data["end_point"] + "/" + data["terminal"] + "/" + scan
+    
+    print("post: " + url)
+    
+    post = requests.get(url)
+  
+#------------------------------------------  
+
+def reboot_function():
+    
+    os.system("sudo reboot")
+  
+#------------------------------------------
+  
+def off_function():
+    
+    os.system("shutdown -h now")
+#------------------------------------------
+
+def config_function():
+    
+    print("\nCONFIGURATION MODE\n")
+    
+    with open("config.txt", "r") as config_file:
+        data = json.load(config_file)
+  
+        data["mode"] = "dweet"
+        data["name"] = input("scan name: ")
+        data["ssid"] = input("scan ssid: ")
+        data["pass"] = input("scan password: ")
+
+        with open("config.txt", "w") as config_file:
+            json.dump(data, config_file)
+            
+        print("\nCONFIGURATION\n")
+        print(data)
+        
+        reboot_function()
+        
+#------------------------------------------        
+
+print("\nPOST MODE")
+
+while scan != 'off':
+    
+    scan = input("\nscan: ")
+    
+    if scan == 'reboot':
+        reboot_function()
+    elif scan == 'config':
+        config_function()
+    else:
+        post_function()
+
+off_function()
+
+
+

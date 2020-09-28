@@ -1,0 +1,1 @@
+{"ssid": "TP-LINK_4FA6", "mode": "connect", "terminal": "laser", "name": "WA8029", "end_point": "http://192.168.0.1:4000", "pass": "61244498", "security": "open"}
